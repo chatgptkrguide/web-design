@@ -21,10 +21,14 @@ export const categoryLabels: Record<string, Record<Locale, string>> = {
   Minimal: { en: "Minimal", ko: "미니멀", zh: "极简", ja: "ミニマル" },
   Editorial: { en: "Editorial", ko: "에디토리얼", zh: "编辑", ja: "エディトリアル" },
   Agency: { en: "Agency", ko: "에이전시", zh: "创意", ja: "エージェンシー" },
+  SaaS: { en: "SaaS", ko: "SaaS", zh: "SaaS", ja: "SaaS" },
+  Photo: { en: "Photo", ko: "사진", zh: "摄影", ja: "写真" },
+  Food: { en: "Food", ko: "음식", zh: "美食", ja: "フード" },
+  Architecture: { en: "Architecture", ko: "건축", zh: "建筑", ja: "建築" },
 };
 
 export const designCategories = [
-  "All", "Video", "Luxury", "Scroll", "Horizontal", "Neon", "Minimal", "Editorial", "Agency",
+  "All", "Video", "Luxury", "Scroll", "Horizontal", "Neon", "Minimal", "Editorial", "Agency", "SaaS", "Photo", "Food", "Architecture",
 ] as const;
 
 export const designs: DesignItem[] = [
@@ -147,5 +151,65 @@ export const designs: DesignItem[] = [
     path: "/designs/creative-agency",
     gradient: "from-emerald-500 via-teal-500 to-cyan-500",
     inspiration: "Awwwards, Basic/Dept",
+  },
+  {
+    id: "saas-landing",
+    title: { en: "SaaS Landing", ko: "SaaS 랜딩", zh: "SaaS着陆页", ja: "SaaSランディング" },
+    description: {
+      en: "Modern SaaS product page with gradient accents and pricing cards",
+      ko: "그래디언트 액센트와 가격표가 있는 모던 SaaS 제품 페이지",
+      zh: "带有渐变色和价格卡的现代SaaS产品页面",
+      ja: "グラデーションアクセントと料金カードのモダンSaaSページ",
+    },
+    category: ["SaaS"],
+    tags: ["saas", "landing", "pricing", "gradient"],
+    path: "/designs/saas-landing",
+    gradient: "from-blue-500 via-violet-500 to-purple-500",
+    inspiration: "Stripe, Linear, Vercel",
+  },
+  {
+    id: "photography",
+    title: { en: "Photography Portfolio", ko: "사진 포트폴리오", zh: "摄影作品集", ja: "写真ポートフォリオ" },
+    description: {
+      en: "Immersive full-bleed photo gallery with masonry grid layout",
+      ko: "몰입형 풀 블리드 포토 갤러리와 메이슨리 그리드",
+      zh: "沉浸式全出血照片画廊与瀑布流布局",
+      ja: "没入型フルブリードフォトギャラリーとメイソンリーグリッド",
+    },
+    category: ["Photo"],
+    tags: ["photography", "gallery", "masonry", "fullbleed"],
+    path: "/designs/photography",
+    gradient: "from-zinc-600 via-zinc-500 to-zinc-400",
+    inspiration: "Unsplash, 500px, VSCO",
+  },
+  {
+    id: "restaurant",
+    title: { en: "Fine Dining", ko: "파인 다이닝", zh: "高级餐厅", ja: "ファインダイニング" },
+    description: {
+      en: "Elegant restaurant page with rich textures and warm color palette",
+      ko: "풍부한 텍스처와 따뜻한 색감의 우아한 레스토랑 페이지",
+      zh: "带有丰富纹理和暖色调的优雅餐厅页面",
+      ja: "豊かなテクスチャーと暖かい色合いのエレガントなレストランページ",
+    },
+    category: ["Food"],
+    tags: ["restaurant", "food", "dining", "warm"],
+    path: "/designs/restaurant",
+    gradient: "from-amber-800 via-orange-700 to-red-800",
+    inspiration: "Noma, Eleven Madison, Alinea",
+  },
+  {
+    id: "architecture",
+    title: { en: "Architecture Studio", ko: "건축 스튜디오", zh: "建筑工作室", ja: "建築スタジオ" },
+    description: {
+      en: "Clean geometric layout with bold structural photography placeholders",
+      ko: "대담한 구조적 사진과 깔끔한 기하학적 레이아웃",
+      zh: "大胆的结构摄影与简洁几何布局",
+      ja: "大胆な構造写真とクリーンな幾何学レイアウト",
+    },
+    category: ["Architecture"],
+    tags: ["architecture", "geometric", "structure", "clean"],
+    path: "/designs/architecture",
+    gradient: "from-gray-700 via-slate-600 to-gray-500",
+    inspiration: "Zaha Hadid, BIG, Tadao Ando",
   },
 ];
