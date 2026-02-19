@@ -87,7 +87,8 @@ function AnimatedSection({
 }: {
   children: React.ReactNode;
   className?: string;
-  variant?: typeof fadeInUp;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  variant?: any;
   delay?: number;
 }) {
   const ref = useRef(null);
@@ -395,7 +396,7 @@ export default function RestaurantPage() {
         >
           <motion.div
             animate={{ y: [0, 8, 0] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" as const }}
             className="w-px h-12"
             style={{ backgroundColor: COLORS.gold }}
           />
