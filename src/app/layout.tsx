@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { I18nProvider } from "@/i18n/context";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -13,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Web Design Gallery | Curated Design Collection",
-  description: "A curated collection of diverse web page designs showcasing various styles and techniques",
+  title: "Web Design Gallery",
+  description: "A curated collection of diverse web page designs",
 };
 
 export default function RootLayout({
@@ -24,10 +25,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <I18nProvider>
+          {children}
+        </I18nProvider>
       </body>
     </html>
   );

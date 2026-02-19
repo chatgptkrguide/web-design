@@ -4,199 +4,348 @@ import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { motion } from "framer-motion";
+import { motion, useInView } from "framer-motion";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Zap, Shield, Cpu, Globe } from "lucide-react";
+import { ArrowLeft, ArrowRight, Zap, Shield, Cpu } from "lucide-react";
+import { useI18n } from "@/i18n/context";
+import LanguageSwitcher from "@/components/common/LanguageSwitcher";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const features = [
-  {
-    icon: Zap,
-    title: "Lightning Performance",
-    description:
-      "Engineered for speed. Every interaction responds in under 16ms, delivering buttery-smooth 60fps animations across all devices.",
+/* ─────────────────────────────────────────────
+   i18n translation records
+   ───────────────────────────────────────────── */
+const tx = {
+  back: { en: "Back", ko: "뒤로", zh: "返回", ja: "戻る" },
+  badge: {
+    en: "Scroll to Explore",
+    ko: "스크롤하여 탐색",
+    zh: "滚动探索",
+    ja: "スクロールして探索",
   },
-  {
-    icon: Shield,
-    title: "Enterprise Security",
-    description:
-      "Bank-grade encryption with zero-knowledge architecture. Your data stays yours — always encrypted, never compromised.",
+  heroTitle1: { en: "NOVA", ko: "NOVA", zh: "NOVA", ja: "NOVA" },
+  heroTitle2: {
+    en: "EXPERIENCE",
+    ko: "EXPERIENCE",
+    zh: "EXPERIENCE",
+    ja: "EXPERIENCE",
   },
-  {
-    icon: Cpu,
-    title: "AI-Powered Engine",
-    description:
-      "An intelligent core that learns and adapts. Predictive workflows that anticipate your needs before you even think of them.",
+  heroSub: {
+    en: "The future of digital interaction. Scroll down to discover.",
+    ko: "디지털 인터랙션의 미래. 스크롤하여 발견하세요.",
+    zh: "数字交互的未来。向下滚动以探索。",
+    ja: "デジタルインタラクションの未来。スクロールして発見。",
   },
-  {
-    icon: Globe,
-    title: "Global Scale",
-    description:
-      "Deployed across 42 edge locations worldwide. Sub-50ms latency no matter where your users are on the planet.",
+  scroll: { en: "Scroll", ko: "스크롤", zh: "滚动", ja: "スクロール" },
+  featLabel: {
+    en: "What We Offer",
+    ko: "제공 서비스",
+    zh: "我们的服务",
+    ja: "提供サービス",
   },
+  featTitle: {
+    en: "Built for the future",
+    ko: "미래를 위한 설계",
+    zh: "为未来而生",
+    ja: "未来のために構築",
+  },
+  feat1Title: {
+    en: "Lightning Performance",
+    ko: "번개 같은 성능",
+    zh: "闪电般的性能",
+    ja: "超高速パフォーマンス",
+  },
+  feat1Desc: {
+    en: "Every interaction responds in under 16ms, delivering buttery-smooth 60fps animations across all devices.",
+    ko: "모든 인터랙션이 16ms 이내에 응답하며 모든 기기에서 부드러운 60fps 애니메이션을 제공합니다.",
+    zh: "每次交互在16ms内响应，在所有设备上提供流畅的60fps动画。",
+    ja: "すべてのインタラクションが16ms以内に応答し、すべてのデバイスで滑らかな60fpsアニメーションを提供します。",
+  },
+  feat2Title: {
+    en: "Enterprise Security",
+    ko: "엔터프라이즈 보안",
+    zh: "企业级安全",
+    ja: "エンタープライズセキュリティ",
+  },
+  feat2Desc: {
+    en: "Bank-grade encryption with zero-knowledge architecture. Your data stays yours — always encrypted.",
+    ko: "제로 지식 아키텍처를 갖춘 은행 등급 암호화. 데이터는 항상 암호화됩니다.",
+    zh: "零知识架构的银行级加密。您的数据始终加密保护。",
+    ja: "ゼロ知識アーキテクチャによる銀行レベルの暗号化。データは常に暗号化されています。",
+  },
+  feat3Title: {
+    en: "AI-Powered Engine",
+    ko: "AI 기반 엔진",
+    zh: "AI驱动引擎",
+    ja: "AI搭載エンジン",
+  },
+  feat3Desc: {
+    en: "An intelligent core that learns and adapts. Predictive workflows that anticipate your needs.",
+    ko: "학습하고 적응하는 지능형 코어. 필요를 예측하는 워크플로우.",
+    zh: "学习和适应的智能核心。预测您需求的工作流程。",
+    ja: "学習し適応するインテリジェントコア。ニーズを予測するワークフロー。",
+  },
+  parallaxTitle1: {
+    en: "Immersive",
+    ko: "몰입적인",
+    zh: "沉浸式",
+    ja: "没入型",
+  },
+  parallaxTitle2: {
+    en: "Experience",
+    ko: "경험",
+    zh: "体验",
+    ja: "体験",
+  },
+  parallaxSub: {
+    en: "Every pixel tells a story",
+    ko: "모든 픽셀이 이야기를 전합니다",
+    zh: "每个像素都在讲述故事",
+    ja: "すべてのピクセルが物語を語る",
+  },
+  statsLabel: {
+    en: "By the Numbers",
+    ko: "숫자로 보기",
+    zh: "数据说话",
+    ja: "数字で見る",
+  },
+  statsTitle: {
+    en: "Impact at scale",
+    ko: "규모의 임팩트",
+    zh: "规模化影响",
+    ja: "スケールのインパクト",
+  },
+  stat1Label: {
+    en: "Projects Delivered",
+    ko: "완료 프로젝트",
+    zh: "交付项目",
+    ja: "完了プロジェクト",
+  },
+  stat2Label: {
+    en: "Active Users",
+    ko: "활성 사용자",
+    zh: "活跃用户",
+    ja: "アクティブユーザー",
+  },
+  stat3Label: {
+    en: "Satisfaction Rate",
+    ko: "만족도",
+    zh: "满意率",
+    ja: "満足度",
+  },
+  stat4Label: {
+    en: "Edge Locations",
+    ko: "엣지 로케이션",
+    zh: "边缘节点",
+    ja: "エッジロケーション",
+  },
+  timelineLabel: {
+    en: "Our Journey",
+    ko: "우리의 여정",
+    zh: "我们的旅程",
+    ja: "私たちの歩み",
+  },
+  timelineTitle: {
+    en: "Milestones",
+    ko: "마일스톤",
+    zh: "里程碑",
+    ja: "マイルストーン",
+  },
+  tl1Title: {
+    en: "The Beginning",
+    ko: "시작",
+    zh: "起步",
+    ja: "始まり",
+  },
+  tl1Desc: {
+    en: "Founded with a vision to redefine digital experiences.",
+    ko: "디지털 경험을 재정의하겠다는 비전으로 설립.",
+    zh: "以重新定义数字体验的愿景而创立。",
+    ja: "デジタル体験を再定義するビジョンで設立。",
+  },
+  tl2Title: {
+    en: "First Milestone",
+    ko: "첫 번째 마일스톤",
+    zh: "第一个里程碑",
+    ja: "最初のマイルストーン",
+  },
+  tl2Desc: {
+    en: "Reached 10,000 users and secured Series A funding.",
+    ko: "사용자 10,000명 달성 및 시리즈 A 투자 유치.",
+    zh: "用户达到10,000人，获得A轮融资。",
+    ja: "ユーザー10,000人達成、シリーズA資金調達。",
+  },
+  tl3Title: {
+    en: "Global Expansion",
+    ko: "글로벌 확장",
+    zh: "全球扩张",
+    ja: "グローバル展開",
+  },
+  tl3Desc: {
+    en: "Launched in 15 new markets across Europe and Asia.",
+    ko: "유럽과 아시아 15개 신규 시장 진출.",
+    zh: "在欧洲和亚洲15个新市场上线。",
+    ja: "ヨーロッパとアジアの15の新市場に展開。",
+  },
+  tl4Title: {
+    en: "AI Integration",
+    ko: "AI 통합",
+    zh: "AI集成",
+    ja: "AI統合",
+  },
+  tl4Desc: {
+    en: "Introduced AI-powered features that changed the game.",
+    ko: "게임 체인저인 AI 기반 기능 도입.",
+    zh: "推出改变游戏规则的AI功能。",
+    ja: "ゲームを変えるAI搭載機能を導入。",
+  },
+  revealLine1: {
+    en: "We build experiences",
+    ko: "우리는 경험을 만듭니다",
+    zh: "我们创造体验",
+    ja: "私たちは体験を創ります",
+  },
+  revealLine2: {
+    en: "that transcend the ordinary",
+    ko: "평범함을 뛰어넘는",
+    zh: "超越平凡",
+    ja: "日常を超越する",
+  },
+  revealLine3: {
+    en: "and inspire the extraordinary.",
+    ko: "그리고 비범함에 영감을 줍니다.",
+    zh: "激发非凡。",
+    ja: "そして非凡さを刺激する。",
+  },
+  ctaLabel: { en: "Ready?", ko: "준비됐나요?", zh: "准备好了吗？", ja: "準備はできましたか？" },
+  ctaTitle1: {
+    en: "Start building",
+    ko: "미래를",
+    zh: "开始构建",
+    ja: "未来を",
+  },
+  ctaTitle2: {
+    en: "the future",
+    ko: "만들어 보세요",
+    zh: "未来",
+    ja: "構築しよう",
+  },
+  ctaSub: {
+    en: "Join thousands of teams already using Nova to create extraordinary digital experiences.",
+    ko: "이미 Nova를 사용하여 놀라운 디지털 경험을 만들고 있는 수천 개의 팀에 합류하세요.",
+    zh: "加入数千个已经使用Nova创造非凡数字体验的团队。",
+    ja: "すでにNovaを使って素晴らしいデジタル体験を創造している数千のチームに参加しましょう。",
+  },
+  ctaBtn: {
+    en: "Get Started",
+    ko: "시작하기",
+    zh: "立即开始",
+    ja: "始める",
+  },
+  footerTech: {
+    en: "GSAP ScrollTrigger + Framer Motion",
+    ko: "GSAP ScrollTrigger + Framer Motion",
+    zh: "GSAP ScrollTrigger + Framer Motion",
+    ja: "GSAP ScrollTrigger + Framer Motion",
+  },
+  footerPrivacy: { en: "Privacy", ko: "개인정보", zh: "隐私", ja: "プライバシー" },
+  footerTerms: { en: "Terms", ko: "이용약관", zh: "条款", ja: "利用規約" },
+  footerContact: { en: "Contact", ko: "문의", zh: "联系", ja: "お問い合わせ" },
+} as const;
+
+/* ─────────────────────────────────────────────
+   Feature / Stat / Timeline data
+   ───────────────────────────────────────────── */
+const featureKeys = [
+  { icon: Zap, titleKey: "feat1Title" as const, descKey: "feat1Desc" as const },
+  { icon: Shield, titleKey: "feat2Title" as const, descKey: "feat2Desc" as const },
+  { icon: Cpu, titleKey: "feat3Title" as const, descKey: "feat3Desc" as const },
 ];
 
-const stats = [
-  { value: 100, suffix: "+", label: "Projects Delivered" },
-  { value: 50, suffix: "K", label: "Active Users" },
-  { value: 99, suffix: "%", label: "Satisfaction Rate" },
-  { value: 42, suffix: "", label: "Edge Locations" },
+const statsData = [
+  { value: 100, suffix: "+", labelKey: "stat1Label" as const },
+  { value: 50, suffix: "K", labelKey: "stat2Label" as const },
+  { value: 99, suffix: "%", labelKey: "stat3Label" as const },
+  { value: 42, suffix: "", labelKey: "stat4Label" as const },
 ];
 
-const timelineItems = [
-  {
-    year: "2020",
-    title: "The Beginning",
-    description: "Founded with a vision to redefine digital experiences.",
-  },
-  {
-    year: "2021",
-    title: "First Milestone",
-    description: "Reached 10,000 users and secured Series A funding.",
-  },
-  {
-    year: "2022",
-    title: "Global Expansion",
-    description: "Launched in 15 new markets across Europe and Asia.",
-  },
-  {
-    year: "2023",
-    title: "AI Integration",
-    description: "Introduced AI-powered features that changed the game.",
-  },
-  {
-    year: "2024",
-    title: "Industry Leader",
-    description: "Recognized as the #1 platform in our category.",
-  },
+const timelineData = [
+  { year: "2021", titleKey: "tl1Title" as const, descKey: "tl1Desc" as const },
+  { year: "2022", titleKey: "tl2Title" as const, descKey: "tl2Desc" as const },
+  { year: "2023", titleKey: "tl3Title" as const, descKey: "tl3Desc" as const },
+  { year: "2024", titleKey: "tl4Title" as const, descKey: "tl4Desc" as const },
 ];
 
-const revealWords = [
-  "We",
-  "build",
-  "experiences",
-  "that",
-  "transcend",
-  "the",
-  "ordinary.",
-];
+/* ─────────────────────────────────────────────
+   AnimatedCounter (framer-motion based)
+   ───────────────────────────────────────────── */
+function AnimatedCounter({ value, suffix }: { value: number; suffix: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const isInView = useInView(ref, { once: true, margin: "-50px" });
+  const displayed = isInView ? value : 0;
 
+  return (
+    <span ref={ref} className="tabular-nums">
+      <motion.span
+        key={isInView ? "counting" : "zero"}
+        initial={{ opacity: 0.5 }}
+        animate={{ opacity: 1 }}
+      >
+        {displayed}
+      </motion.span>
+      {suffix}
+    </span>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   Page Component
+   ───────────────────────────────────────────── */
 export default function ScrollAnimationPage() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const heroRef = useRef<HTMLDivElement>(null);
-  const heroTextRef = useRef<HTMLHeadingElement>(null);
-  const heroOverlayRef = useRef<HTMLDivElement>(null);
-  const featuresRef = useRef<HTMLDivElement>(null);
-  const featureItemsRef = useRef<HTMLDivElement[]>([]);
-  const parallaxRef = useRef<HTMLDivElement>(null);
-  const statsRef = useRef<HTMLDivElement>(null);
-  const statNumbersRef = useRef<HTMLSpanElement[]>([]);
-  const timelineRef = useRef<HTMLDivElement>(null);
-  const timelineItemsRef = useRef<HTMLDivElement[]>([]);
-  const typographyRef = useRef<HTMLDivElement>(null);
-  const wordRefs = useRef<HTMLSpanElement[]>([]);
-  const ctaRef = useRef<HTMLDivElement>(null);
+  const { t } = useI18n();
 
+  const containerRef = useRef<HTMLDivElement>(null);
+  const parallaxRef = useRef<HTMLDivElement>(null);
+
+  /* ── GSAP ScrollTrigger animations ── */
   useGSAP(
     () => {
       if (!containerRef.current) return;
 
-      // --- Hero Pin & Zoom ---
-      const heroTl = gsap.timeline({
-        scrollTrigger: {
-          trigger: heroRef.current,
-          start: "top top",
-          end: "+=150%",
-          pin: true,
-          scrub: 1,
-        },
-      });
-
-      heroTl
-        .to(heroTextRef.current, {
-          scale: 0.5,
-          opacity: 0.3,
-          duration: 1,
-        })
-        .to(
-          heroOverlayRef.current,
-          {
-            opacity: 0.8,
-            duration: 1,
-          },
-          0
-        )
-        .to(
-          ".hero-subtitle",
-          {
-            y: -60,
-            opacity: 0,
-            duration: 0.6,
-          },
-          0
-        )
-        .to(
-          ".hero-badge",
-          {
-            scale: 0.8,
-            opacity: 0,
-            duration: 0.5,
-          },
-          0
-        );
-
-      // --- Feature Reveal ---
-      featureItemsRef.current.forEach((item, i) => {
-        if (!item) return;
-        const direction = i % 2 === 0 ? -120 : 120;
-
-        gsap.from(item, {
-          x: direction,
-          opacity: 0,
-          duration: 1,
-          scrollTrigger: {
-            trigger: item,
-            start: "top 85%",
-            end: "top 40%",
-            scrub: 1,
-          },
-        });
-
-        // Animate the icon
-        gsap.from(item.querySelector(".feature-icon"), {
-          scale: 0,
-          rotation: -180,
-          duration: 0.8,
-          scrollTrigger: {
-            trigger: item,
-            start: "top 75%",
-            end: "top 50%",
-            scrub: 1,
-          },
-        });
-
-        // Animate the description line
-        gsap.from(item.querySelector(".feature-desc"), {
-          y: 30,
-          opacity: 0,
-          duration: 0.6,
-          scrollTrigger: {
-            trigger: item,
-            start: "top 70%",
-            end: "top 45%",
-            scrub: 1,
-          },
-        });
-      });
-
-      // --- Parallax Section ---
+      // Parallax section — bg moves slower than text
       if (parallaxRef.current) {
-        const layers = parallaxRef.current.querySelectorAll(".parallax-layer");
-        layers.forEach((layer, i) => {
-          const speed = (i + 1) * 80;
-          gsap.to(layer, {
-            y: -speed,
+        const bgLayer = parallaxRef.current.querySelector(".parallax-bg");
+        const fgLayer = parallaxRef.current.querySelector(".parallax-fg");
+
+        if (bgLayer) {
+          gsap.to(bgLayer, {
+            y: -120,
+            scrollTrigger: {
+              trigger: parallaxRef.current,
+              start: "top bottom",
+              end: "bottom top",
+              scrub: 1,
+            },
+          });
+        }
+
+        if (fgLayer) {
+          gsap.to(fgLayer, {
+            y: -260,
+            scrollTrigger: {
+              trigger: parallaxRef.current,
+              start: "top bottom",
+              end: "bottom top",
+              scrub: 1,
+            },
+          });
+        }
+
+        // Floating particles
+        const particles = parallaxRef.current.querySelectorAll(".parallax-particle");
+        particles.forEach((p, i) => {
+          gsap.to(p, {
+            y: -(60 + i * 50),
             scrollTrigger: {
               trigger: parallaxRef.current,
               start: "top bottom",
@@ -205,248 +354,94 @@ export default function ScrollAnimationPage() {
             },
           });
         });
-
-        // Floating text
-        gsap.fromTo(
-          ".parallax-text",
-          { scale: 0.6, opacity: 0 },
-          {
-            scale: 1,
-            opacity: 1,
-            scrollTrigger: {
-              trigger: parallaxRef.current,
-              start: "top 60%",
-              end: "center center",
-              scrub: 1,
-            },
-          }
-        );
-
-        gsap.to(".parallax-text", {
-          scale: 1.3,
-          opacity: 0,
-          scrollTrigger: {
-            trigger: parallaxRef.current,
-            start: "center center",
-            end: "bottom 40%",
-            scrub: 1,
-          },
-        });
       }
 
-      // --- Stats Counter ---
-      statNumbersRef.current.forEach((el, i) => {
-        if (!el) return;
-        const target = stats[i].value;
-
-        gsap.fromTo(
-          el,
-          { innerText: 0 },
-          {
-            innerText: target,
-            duration: 2,
-            snap: { innerText: 1 },
-            scrollTrigger: {
-              trigger: el,
-              start: "top 80%",
-              toggleActions: "play none none reverse",
-            },
-          }
-        );
-
-        // Scale-in animation for stat cards
-        gsap.from(el.closest(".stat-card")!, {
-          y: 60,
-          opacity: 0,
-          scale: 0.9,
-          duration: 0.8,
-          delay: i * 0.15,
-          scrollTrigger: {
-            trigger: statsRef.current,
-            start: "top 75%",
-            toggleActions: "play none none reverse",
-          },
-        });
-      });
-
-      // --- Timeline ---
-      // Animate the timeline line drawing
-      gsap.from(".timeline-line", {
+      // Timeline line draw
+      gsap.from(".timeline-line-inner", {
         scaleY: 0,
         transformOrigin: "top center",
         scrollTrigger: {
-          trigger: timelineRef.current,
+          trigger: ".timeline-wrap",
           start: "top 70%",
           end: "bottom 60%",
           scrub: 1,
         },
       });
-
-      timelineItemsRef.current.forEach((item, i) => {
-        if (!item) return;
-        const direction = i % 2 === 0 ? -80 : 80;
-
-        gsap.from(item, {
-          x: direction,
-          opacity: 0,
-          duration: 0.8,
-          scrollTrigger: {
-            trigger: item,
-            start: "top 85%",
-            end: "top 60%",
-            scrub: 1,
-          },
-        });
-
-        // Dot pulse
-        gsap.from(item.querySelector(".timeline-dot"), {
-          scale: 0,
-          duration: 0.4,
-          scrollTrigger: {
-            trigger: item,
-            start: "top 80%",
-            toggleActions: "play none none reverse",
-          },
-        });
-      });
-
-      // --- Large Typography Reveal ---
-      wordRefs.current.forEach((word, i) => {
-        if (!word) return;
-
-        gsap.fromTo(
-          word,
-          {
-            opacity: 0.1,
-            scale: 0.85,
-            y: 20,
-          },
-          {
-            opacity: 1,
-            scale: 1,
-            y: 0,
-            duration: 0.6,
-            scrollTrigger: {
-              trigger: word,
-              start: "top 80%",
-              end: "top 50%",
-              scrub: 1,
-            },
-          }
-        );
-      });
-
-      // Pin the typography section
-      gsap.timeline({
-        scrollTrigger: {
-          trigger: typographyRef.current,
-          start: "top top",
-          end: "+=200%",
-          pin: true,
-          scrub: 1,
-        },
-      });
-
-      // --- CTA Fade In ---
-      gsap.from(ctaRef.current, {
-        y: 80,
-        opacity: 0,
-        scale: 0.9,
-        duration: 1,
-        scrollTrigger: {
-          trigger: ctaRef.current,
-          start: "top 85%",
-          end: "top 55%",
-          scrub: 1,
-        },
-      });
-
-      // Glow pulse on CTA button
-      gsap.to(".cta-glow", {
-        opacity: 0.6,
-        scale: 1.2,
-        repeat: -1,
-        yoyo: true,
-        duration: 2,
-        ease: "sine.inOut",
-      });
     },
     { scope: containerRef }
   );
 
+  /* ── Shared framer-motion variants ── */
+  const fadeUp = {
+    initial: { opacity: 0.15, y: 40 },
+    whileInView: { opacity: 1, y: 0 },
+    viewport: { once: true, margin: "-60px" as const },
+    transition: { duration: 0.7, ease: "easeOut" as const },
+  };
+
   return (
-    <div ref={containerRef} className="bg-[#050505] text-white overflow-hidden">
-      {/* Back Navigation */}
+    <div ref={containerRef} className="bg-[#0A0A0A] text-white overflow-hidden">
+      {/* ── Top Bar: Back + Language ── */}
       <motion.div
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.5, delay: 0.3 }}
-        className="fixed top-6 left-6 z-50"
+        initial={{ opacity: 0, y: -12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+        className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 bg-[#0A0A0A]/70 backdrop-blur-md border-b border-white/5"
       >
         <Link
           href="/"
-          className="group flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 backdrop-blur-md border border-white/10 text-white/60 hover:text-white hover:bg-white/10 transition-all duration-300"
+          className="group flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-white/60 hover:text-white hover:bg-white/10 transition-all duration-300"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-          <span className="text-sm font-medium">Back</span>
+          <span className="text-sm font-medium">{t(tx.back)}</span>
         </Link>
+        <LanguageSwitcher variant="dark" />
       </motion.div>
 
-      {/* ============================== */}
-      {/* SECTION 1: HERO - Pin & Zoom  */}
-      {/* ============================== */}
-      <section
-        ref={heroRef}
-        className="relative h-screen flex flex-col items-center justify-center overflow-hidden"
-      >
-        {/* Background gradient layers */}
+      {/* ===================================== */}
+      {/* SECTION 1 — HERO                      */}
+      {/* ===================================== */}
+      <section className="relative min-h-[80vh] flex flex-col items-center justify-center pt-20 bg-[#0A0A0A]">
+        {/* Background effects */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(120,80,255,0.15)_0%,transparent_70%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(0,200,255,0.08)_0%,transparent_50%)]" />
-
-        {/* Overlay that darkens on scroll */}
-        <div
-          ref={heroOverlayRef}
-          className="absolute inset-0 bg-black opacity-0 z-10"
-        />
-
-        {/* Animated grid background */}
         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:80px_80px]" />
 
         {/* Badge */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="hero-badge relative z-20 mb-8 px-5 py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm"
+          transition={{ duration: 0.6, delay: 0.3 }}
+          className="relative z-10 mb-8 px-5 py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm"
         >
           <span className="text-xs font-mono uppercase tracking-[0.3em] text-white/50">
-            Scroll to Explore
+            {t(tx.badge)}
           </span>
         </motion.div>
 
-        {/* Main Hero Text */}
-        <h1
-          ref={heroTextRef}
-          className="relative z-20 text-[clamp(3rem,12vw,12rem)] font-black leading-[0.85] tracking-tighter text-center"
+        {/* Main Heading */}
+        <motion.h1
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8, delay: 0.4 }}
+          className="relative z-10 text-[clamp(3rem,12vw,10rem)] font-black leading-[0.85] tracking-tighter text-center"
         >
           <span className="block bg-clip-text text-transparent bg-gradient-to-b from-white via-white/90 to-white/40">
-            NOVA
+            {t(tx.heroTitle1)}
           </span>
           <span className="block bg-clip-text text-transparent bg-gradient-to-b from-white/60 to-white/10 text-[0.4em] tracking-wide mt-2">
-            EXPERIENCE
+            {t(tx.heroTitle2)}
           </span>
-        </h1>
+        </motion.h1>
 
         {/* Subtitle */}
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.5 }}
-          className="hero-subtitle relative z-20 mt-8 text-lg md:text-xl text-white/40 max-w-md text-center leading-relaxed"
+          transition={{ duration: 0.8, delay: 0.6 }}
+          className="relative z-10 mt-8 text-lg md:text-xl text-white/40 max-w-md text-center leading-relaxed px-6"
         >
-          The future of digital interaction.
-          <br />
-          Scroll down to discover.
+          {t(tx.heroSub)}
         </motion.p>
 
         {/* Scroll indicator */}
@@ -454,14 +449,14 @@ export default function ScrollAnimationPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.2 }}
-          className="hero-subtitle absolute bottom-12 z-20 flex flex-col items-center gap-2"
+          className="relative z-10 mt-16 mb-8 flex flex-col items-center gap-2"
         >
           <span className="text-xs font-mono text-white/30 tracking-widest uppercase">
-            Scroll
+            {t(tx.scroll)}
           </span>
           <motion.div
             animate={{ y: [0, 8, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" as const }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
             className="w-5 h-8 rounded-full border border-white/20 flex items-start justify-center pt-1.5"
           >
             <div className="w-1 h-1.5 rounded-full bg-white/50" />
@@ -469,290 +464,285 @@ export default function ScrollAnimationPage() {
         </motion.div>
       </section>
 
-      {/* ============================== */}
-      {/* SECTION 2: FEATURE REVEAL     */}
-      {/* ============================== */}
-      <section ref={featuresRef} className="relative py-40 px-6 md:px-12 lg:px-20">
+      {/* ===================================== */}
+      {/* SECTION 2 — FEATURE CARDS (3-column)  */}
+      {/* ===================================== */}
+      <section className="relative py-32 px-6 md:px-12 lg:px-20 bg-zinc-900">
         <div className="max-w-6xl mx-auto">
           {/* Section header */}
-          <div className="text-center mb-32">
-            <motion.span
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              className="text-xs font-mono uppercase tracking-[0.3em] text-white/30"
-            >
-              What We Offer
-            </motion.span>
-            <motion.h2
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, delay: 0.1 }}
-              className="text-4xl md:text-6xl font-bold mt-4 tracking-tight"
-            >
-              Built for the{" "}
+          <motion.div className="text-center mb-20" {...fadeUp}>
+            <span className="text-xs font-mono uppercase tracking-[0.3em] text-white/30">
+              {t(tx.featLabel)}
+            </span>
+            <h2 className="text-4xl md:text-6xl font-bold mt-4 tracking-tight">
+              {t(tx.featTitle).split(" ").slice(0, -1).join(" ")}{" "}
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-cyan-400">
-                future
+                {t(tx.featTitle).split(" ").slice(-1)}
               </span>
-            </motion.h2>
-          </div>
+            </h2>
+          </motion.div>
 
-          {/* Feature cards */}
-          <div className="space-y-24">
-            {features.map((feature, i) => (
-              <div
+          {/* 3-column cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {featureKeys.map((feat, i) => (
+              <motion.div
                 key={i}
-                ref={(el) => {
-                  if (el) featureItemsRef.current[i] = el;
-                }}
-                className={`flex flex-col ${
-                  i % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse"
-                } items-center gap-12 md:gap-20`}
+                initial={{ opacity: 0.15, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.6, delay: i * 0.15 }}
+                className="group relative p-8 rounded-2xl bg-[#0A0A0A] border border-white/10 hover:border-white/20 transition-colors duration-500"
               >
-                {/* Icon */}
-                <div className="feature-icon flex-shrink-0 w-24 h-24 rounded-2xl bg-gradient-to-br from-white/10 to-white/[0.02] border border-white/10 flex items-center justify-center">
-                  <feature.icon className="w-10 h-10 text-purple-400/80" />
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500/20 to-cyan-500/20 border border-white/10 flex items-center justify-center mb-6">
+                  <feat.icon className="w-6 h-6 text-purple-400" />
                 </div>
-
-                {/* Content */}
-                <div
-                  className={`flex-1 ${
-                    i % 2 === 0 ? "text-left" : "md:text-right"
-                  }`}
-                >
-                  <h3 className="text-2xl md:text-3xl font-bold mb-4 tracking-tight">
-                    {feature.title}
-                  </h3>
-                  <p className="feature-desc text-base md:text-lg text-white/40 leading-relaxed max-w-lg">
-                    {feature.description}
-                  </p>
-                </div>
-              </div>
+                <h3 className="text-xl font-bold mb-3 tracking-tight">
+                  {t(tx[feat.titleKey])}
+                </h3>
+                <p className="text-sm text-white/40 leading-relaxed">
+                  {t(tx[feat.descKey])}
+                </p>
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ============================== */}
-      {/* SECTION 3: PARALLAX LAYERS    */}
-      {/* ============================== */}
+      {/* ===================================== */}
+      {/* SECTION 3 — PARALLAX (GSAP)           */}
+      {/* ===================================== */}
       <section
         ref={parallaxRef}
-        className="relative h-[120vh] overflow-hidden flex items-center justify-center"
+        className="relative h-[90vh] overflow-hidden flex items-center justify-center bg-[#0A0A0A]"
       >
-        {/* Parallax Layer 1 - Far background */}
-        <div className="parallax-layer absolute inset-0 flex items-center justify-center">
-          <div className="w-[600px] h-[600px] rounded-full bg-gradient-to-br from-purple-900/20 to-transparent blur-3xl" />
+        {/* Slow-moving background gradient */}
+        <div className="parallax-bg absolute inset-0">
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-900/30 via-[#0A0A0A] to-cyan-900/20" />
+          <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full bg-purple-600/10 blur-[120px]" />
+          <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] rounded-full bg-cyan-600/10 blur-[100px]" />
         </div>
 
-        {/* Parallax Layer 2 - Mid */}
-        <div className="parallax-layer absolute inset-0">
-          <div className="absolute top-[15%] left-[10%] w-2 h-2 rounded-full bg-purple-400/40" />
-          <div className="absolute top-[25%] right-[20%] w-3 h-3 rounded-full bg-cyan-400/30" />
-          <div className="absolute bottom-[30%] left-[25%] w-1.5 h-1.5 rounded-full bg-white/20" />
-          <div className="absolute top-[40%] right-[35%] w-2.5 h-2.5 rounded-full bg-purple-300/25" />
-          <div className="absolute bottom-[20%] right-[15%] w-2 h-2 rounded-full bg-cyan-300/20" />
-          <div className="absolute top-[60%] left-[40%] w-1 h-1 rounded-full bg-white/30" />
-        </div>
+        {/* Floating particles */}
+        <div className="parallax-particle absolute top-[15%] left-[10%] w-2 h-2 rounded-full bg-purple-400/40" />
+        <div className="parallax-particle absolute top-[25%] right-[20%] w-3 h-3 rounded-full bg-cyan-400/30" />
+        <div className="parallax-particle absolute bottom-[30%] left-[25%] w-1.5 h-1.5 rounded-full bg-white/20" />
+        <div className="parallax-particle absolute top-[50%] right-[35%] w-2 h-2 rounded-full bg-purple-300/25" />
+        <div className="parallax-particle absolute bottom-[20%] right-[15%] w-2 h-2 rounded-full bg-cyan-300/20" />
 
-        {/* Parallax Layer 3 - Geometric shapes */}
-        <div className="parallax-layer absolute inset-0">
-          <div className="absolute top-[20%] left-[15%] w-32 h-32 border border-white/5 rounded-2xl rotate-45" />
-          <div className="absolute bottom-[25%] right-[10%] w-40 h-40 border border-white/[0.03] rounded-full" />
-          <div className="absolute top-[50%] left-[60%] w-24 h-24 border border-purple-500/10 rounded-xl rotate-12" />
-        </div>
+        {/* Geometric shapes */}
+        <div className="parallax-particle absolute top-[20%] left-[15%] w-32 h-32 border border-white/5 rounded-2xl rotate-45" />
+        <div className="parallax-particle absolute bottom-[25%] right-[10%] w-40 h-40 border border-white/[0.03] rounded-full" />
 
-        {/* Parallax Layer 4 - Near foreground */}
-        <div className="parallax-layer absolute inset-0">
-          <div className="absolute top-[10%] right-[30%] w-48 h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent rotate-[30deg]" />
-          <div className="absolute bottom-[35%] left-[20%] w-64 h-[1px] bg-gradient-to-r from-transparent via-purple-400/10 to-transparent -rotate-[20deg]" />
-        </div>
-
-        {/* Center floating text */}
-        <div className="parallax-text relative z-10 text-center">
-          <h2 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter">
-            <span className="block bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-cyan-300 to-purple-400">
-              Immersive
-            </span>
-            <span className="block text-white/80 mt-2">Experience</span>
-          </h2>
-          <p className="mt-6 text-white/30 text-lg font-light tracking-wide">
-            Every pixel tells a story
-          </p>
+        {/* Fast-moving foreground text */}
+        <div className="parallax-fg relative z-10 text-center">
+          <motion.div
+            initial={{ opacity: 0.15, scale: 0.85 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.8 }}
+          >
+            <h2 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter">
+              <span className="block bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-cyan-300 to-purple-400">
+                {t(tx.parallaxTitle1)}
+              </span>
+              <span className="block text-white/80 mt-2">
+                {t(tx.parallaxTitle2)}
+              </span>
+            </h2>
+            <p className="mt-6 text-white/30 text-lg font-light tracking-wide">
+              {t(tx.parallaxSub)}
+            </p>
+          </motion.div>
         </div>
       </section>
 
-      {/* ============================== */}
-      {/* SECTION 4: NUMBER COUNTER     */}
-      {/* ============================== */}
-      <section ref={statsRef} className="relative py-40 px-6 md:px-12 lg:px-20">
+      {/* ===================================== */}
+      {/* SECTION 4 — STATS (framer-motion)     */}
+      {/* ===================================== */}
+      <section className="relative py-32 px-6 md:px-12 lg:px-20 bg-zinc-950">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(120,80,255,0.08)_0%,transparent_70%)]" />
 
         <div className="max-w-6xl mx-auto relative z-10">
-          <div className="text-center mb-20">
+          <motion.div className="text-center mb-20" {...fadeUp}>
             <span className="text-xs font-mono uppercase tracking-[0.3em] text-white/30">
-              By the Numbers
+              {t(tx.statsLabel)}
             </span>
             <h2 className="text-4xl md:text-5xl font-bold mt-4 tracking-tight">
-              Impact at scale
+              {t(tx.statsTitle)}
             </h2>
-          </div>
+          </motion.div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {stats.map((stat, i) => (
-              <div
+            {statsData.map((stat, i) => (
+              <motion.div
                 key={i}
-                className="stat-card group text-center p-8 rounded-2xl bg-white/[0.02] border border-white/[0.06] hover:border-white/15 transition-colors duration-500"
+                initial={{ opacity: 0.15, y: 40, scale: 0.95 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.6, delay: i * 0.1 }}
+                className="text-center p-8 rounded-2xl bg-white/[0.03] border border-white/[0.08] hover:border-white/15 transition-colors duration-500"
               >
-                <div className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight mb-3">
-                  <span
-                    ref={(el) => {
-                      if (el) statNumbersRef.current[i] = el;
-                    }}
-                    className="bg-clip-text text-transparent bg-gradient-to-b from-white to-white/60"
-                  >
-                    0
-                  </span>
-                  <span className="bg-clip-text text-transparent bg-gradient-to-b from-white to-white/60">
-                    {stat.suffix}
-                  </span>
+                <div className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight mb-3 bg-clip-text text-transparent bg-gradient-to-b from-white to-white/60">
+                  <AnimatedCounter value={stat.value} suffix={stat.suffix} />
                 </div>
                 <p className="text-sm text-white/30 font-medium tracking-wide uppercase">
-                  {stat.label}
+                  {t(tx[stat.labelKey])}
                 </p>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ============================== */}
-      {/* SECTION 5: TIMELINE           */}
-      {/* ============================== */}
-      <section ref={timelineRef} className="relative py-40 px-6 md:px-12 lg:px-20">
+      {/* ===================================== */}
+      {/* SECTION 5 — TIMELINE                  */}
+      {/* ===================================== */}
+      <section className="relative py-32 px-6 md:px-12 lg:px-20 bg-[#0A0A0A]">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-24">
+          <motion.div className="text-center mb-24" {...fadeUp}>
             <span className="text-xs font-mono uppercase tracking-[0.3em] text-white/30">
-              Our Journey
+              {t(tx.timelineLabel)}
             </span>
             <h2 className="text-4xl md:text-5xl font-bold mt-4 tracking-tight">
-              Milestones
+              {t(tx.timelineTitle)}
             </h2>
-          </div>
+          </motion.div>
 
-          <div className="relative">
-            {/* Vertical line */}
-            <div className="timeline-line absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-[1px] bg-gradient-to-b from-transparent via-white/20 to-transparent" />
+          <div className="timeline-wrap relative">
+            {/* Vertical connecting line */}
+            <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-[1px]">
+              <div className="timeline-line-inner w-full h-full bg-gradient-to-b from-transparent via-white/20 to-transparent" />
+            </div>
 
-            <div className="space-y-20">
-              {timelineItems.map((item, i) => (
-                <div
-                  key={i}
-                  ref={(el) => {
-                    if (el) timelineItemsRef.current[i] = el;
-                  }}
-                  className={`relative flex items-center ${
-                    i % 2 === 0 ? "justify-start" : "justify-end"
-                  }`}
-                >
-                  {/* Dot on timeline */}
-                  <div className="timeline-dot absolute left-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-purple-500 shadow-[0_0_12px_rgba(168,85,247,0.5)] z-10" />
-
-                  {/* Content card */}
-                  <div
-                    className={`w-[calc(50%-40px)] p-6 rounded-2xl bg-white/[0.03] border border-white/[0.06] ${
-                      i % 2 === 0 ? "text-right mr-auto" : "text-left ml-auto"
+            <div className="space-y-16">
+              {timelineData.map((item, i) => {
+                const isLeft = i % 2 === 0;
+                return (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0.15, x: isLeft ? -60 : 60 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true, margin: "-60px" }}
+                    transition={{ duration: 0.6, delay: 0.1 }}
+                    className={`relative flex items-center ${
+                      isLeft ? "justify-start" : "justify-end"
                     }`}
                   >
-                    <span className="text-xs font-mono text-purple-400/70 tracking-wider">
-                      {item.year}
-                    </span>
-                    <h3 className="text-xl font-bold mt-2 mb-2 tracking-tight">
-                      {item.title}
-                    </h3>
-                    <p className="text-sm text-white/40 leading-relaxed">
-                      {item.description}
-                    </p>
-                  </div>
-                </div>
-              ))}
+                    {/* Dot */}
+                    <div className="absolute left-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-purple-500 shadow-[0_0_12px_rgba(168,85,247,0.5)] z-10" />
+
+                    {/* Card */}
+                    <div
+                      className={`w-[calc(50%-40px)] p-6 rounded-2xl bg-white/[0.03] border border-white/[0.08] ${
+                        isLeft ? "text-right mr-auto" : "text-left ml-auto"
+                      }`}
+                    >
+                      <span className="text-xs font-mono text-purple-400/70 tracking-wider">
+                        {item.year}
+                      </span>
+                      <h3 className="text-xl font-bold mt-2 mb-2 tracking-tight">
+                        {t(tx[item.titleKey])}
+                      </h3>
+                      <p className="text-sm text-white/40 leading-relaxed">
+                        {t(tx[item.descKey])}
+                      </p>
+                    </div>
+                  </motion.div>
+                );
+              })}
             </div>
           </div>
         </div>
       </section>
 
-      {/* ============================== */}
-      {/* SECTION 6: LARGE TYPOGRAPHY   */}
-      {/* ============================== */}
-      <section
-        ref={typographyRef}
-        className="relative h-screen flex items-center justify-center px-6"
-      >
+      {/* ===================================== */}
+      {/* SECTION 6 — LARGE TEXT REVEAL         */}
+      {/* ===================================== */}
+      <section className="relative py-40 px-6 flex items-center justify-center bg-zinc-900">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(120,80,255,0.06)_0%,transparent_60%)]" />
 
-        <div className="relative z-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 max-w-5xl">
-          {revealWords.map((word, i) => (
-            <span
-              key={i}
-              ref={(el) => {
-                if (el) wordRefs.current[i] = el;
-              }}
-              className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight"
-              style={{
-                background:
-                  i === 2 || i === 4
-                    ? "linear-gradient(135deg, #a855f7, #22d3ee)"
-                    : "linear-gradient(180deg, #fff, rgba(255,255,255,0.5))",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-              }}
-            >
-              {word}
-            </span>
-          ))}
+        <div className="relative z-10 max-w-4xl mx-auto text-center space-y-4">
+          {[tx.revealLine1, tx.revealLine2, tx.revealLine3].map(
+            (line, i) => (
+              <motion.p
+                key={i}
+                initial={{ opacity: 0.15, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.7, delay: i * 0.2 }}
+                className="text-3xl md:text-5xl lg:text-6xl font-black tracking-tight leading-tight"
+                style={{
+                  background:
+                    i === 1
+                      ? "linear-gradient(135deg, #a855f7, #22d3ee)"
+                      : "linear-gradient(180deg, #fff, rgba(255,255,255,0.5))",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
+              >
+                {t(line)}
+              </motion.p>
+            )
+          )}
         </div>
       </section>
 
-      {/* ============================== */}
-      {/* SECTION 7: CTA                */}
-      {/* ============================== */}
-      <section className="relative py-40 px-6 md:px-12 lg:px-20">
-        <div
-          ref={ctaRef}
-          className="max-w-3xl mx-auto text-center"
+      {/* ===================================== */}
+      {/* SECTION 7 — CTA                       */}
+      {/* ===================================== */}
+      <section className="relative py-32 px-6 md:px-12 lg:px-20 bg-[#0A0A0A]">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(120,80,255,0.1)_0%,transparent_60%)]" />
+
+        <motion.div
+          initial={{ opacity: 0.15, y: 60 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.8 }}
+          className="max-w-3xl mx-auto text-center relative z-10"
         >
           <span className="text-xs font-mono uppercase tracking-[0.3em] text-white/30">
-            Ready?
+            {t(tx.ctaLabel)}
           </span>
           <h2 className="text-4xl md:text-6xl lg:text-7xl font-black mt-6 mb-8 tracking-tight leading-[0.95]">
-            Start building
+            {t(tx.ctaTitle1)}
             <br />
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-cyan-400">
-              the future
+              {t(tx.ctaTitle2)}
             </span>
           </h2>
           <p className="text-lg text-white/40 mb-12 max-w-lg mx-auto leading-relaxed">
-            Join thousands of teams already using Nova to create
-            extraordinary digital experiences.
+            {t(tx.ctaSub)}
           </p>
 
           {/* CTA Button */}
           <div className="relative inline-block">
-            <div className="cta-glow absolute inset-0 bg-gradient-to-r from-purple-500/30 to-cyan-500/30 rounded-full blur-xl opacity-40" />
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/30 to-cyan-500/30 rounded-full blur-xl opacity-40 animate-pulse" />
             <button className="relative px-10 py-4 rounded-full bg-gradient-to-r from-purple-500 to-cyan-500 text-white font-semibold text-lg tracking-wide hover:shadow-[0_0_40px_rgba(168,85,247,0.4)] transition-shadow duration-500 flex items-center gap-3">
-              Get Started
+              {t(tx.ctaBtn)}
               <ArrowRight className="w-5 h-5" />
             </button>
           </div>
-        </div>
+        </motion.div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-white/5 py-8 px-6 md:px-12 lg:px-20">
-        <div className="flex items-center justify-between text-sm text-white/20 max-w-6xl mx-auto">
-          <span className="font-mono">NOVA</span>
-          <span className="font-mono">GSAP ScrollTrigger + Framer Motion</span>
+      {/* ===================================== */}
+      {/* FOOTER                                */}
+      {/* ===================================== */}
+      <footer className="border-t border-white/5 py-8 px-6 md:px-12 lg:px-20 bg-[#0A0A0A]">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-white/20">
+          <span className="font-mono font-bold text-white/40">NOVA</span>
+          <div className="flex items-center gap-6">
+            <span className="hover:text-white/40 cursor-pointer transition-colors">
+              {t(tx.footerPrivacy)}
+            </span>
+            <span className="hover:text-white/40 cursor-pointer transition-colors">
+              {t(tx.footerTerms)}
+            </span>
+            <span className="hover:text-white/40 cursor-pointer transition-colors">
+              {t(tx.footerContact)}
+            </span>
+          </div>
+          <span className="font-mono text-xs">{t(tx.footerTech)}</span>
         </div>
       </footer>
     </div>
